@@ -15,8 +15,8 @@ def main(
         return -1
     if not (window := sdl3.SDL_CreateWindow(
         "Test".encode(),
-        1600,
-        900,
+        800,
+        600,
         sdl3.SDL_WINDOW_RESIZABLE
     )):
         print(f"Failed to create window: {sdl3.SDL_GetError().decode()}.")
@@ -51,7 +51,13 @@ def main(
 
         width, height = ctypes.c_int(), ctypes.c_int()
         sdl3.SDL_GetWindowSize(window, width, height)
+        sdl3.SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255)
+        fillrect = sdl3.SDL_FRect(100.0, 100.0, 200.0, 150.0)
+        sdl3.SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255)
         sdl3.SDL_RenderClear(renderer)
+        sdl3.SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255)
+        sdl3.SDL_RenderFillRect(renderer, fillrect)
+        sdl3.SDL_RenderPresent(renderer)
 
     sdl3.SDL_DestroyRenderer(renderer)
     sdl3.SDL_DestroyWindow(window)
