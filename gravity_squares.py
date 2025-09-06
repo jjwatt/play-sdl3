@@ -1,7 +1,8 @@
 """Gravity Squares."""
 import ctypes
-import sdl3
 from dataclasses import dataclass
+import random
+import sdl3
 from typing import NamedTuple
 
 
@@ -33,7 +34,7 @@ class Color(NamedTuple):
 
 @dataclass
 class Square:
-    """A Square for moving around."""
+    """A colored square for moving around."""
 
     size: Vec2 = None
     position: Vec2 = None
@@ -80,6 +81,15 @@ class World:
     gravity: float = 0.5
     damping: float = 0.9
     air_resistance: float = 0.995
+
+
+def get_random_color() -> Color:
+    """Get a random Color."""
+    return Color(
+        red=random.randint(0, 255),
+        green=random.randint(0, 255),
+        blue=random.randing(0, 255)
+    )
 
 
 @sdl3.SDL_main_func
