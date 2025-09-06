@@ -8,7 +8,7 @@ def main(
         argc: ctypes.c_int,
         argv: sdl3.LP_c_char_p
 ) -> ctypes.c_int:
-    """The main body of the program."""
+    """Run the main part of the program."""
     print("Hello from play-sdl3!")
     if not sdl3.SDL_Init(sdl3.SDL_INIT_VIDEO | sdl3.SDL_INIT_EVENTS):
         print(f"Failed to initialize: {sdl3.SDL_GetError().decode()}")
@@ -27,7 +27,7 @@ def main(
     def try_get_driver(order, drivers):
         return next((i for i in order if i in drivers), None)
 
-    try_use_vulkan = True
+    try_use_vulkan = False
     render_driver = try_get_driver(
         ((["vulkan"] if try_use_vulkan else [])
          + ["opengl", "software"]), render_drivers
