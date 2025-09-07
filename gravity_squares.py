@@ -107,6 +107,20 @@ def get_random_velocity(
     )
 
 
+def set_color(
+        renderer: sdl3.SDL_Renderer,
+        color: Color
+) -> None:
+    """Set Render Draw Color."""
+    sdl3.SDL_SetRenderDrawColor(
+        renderer,
+        color.red,
+        color.green,
+        color.blue,
+        color.alpha
+    )
+
+
 def init() -> None:
     """Initialize SDL3."""
     if not sdl3.SDL_Init(
