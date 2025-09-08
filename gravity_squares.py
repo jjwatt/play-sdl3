@@ -10,7 +10,8 @@ class SDLException(Exception):
     """SDL Exception."""
 
 
-class Vec2(NamedTuple):
+@dataclass
+class Vec2():
     """2D vector with x and y."""
 
     x: float = 0
@@ -20,6 +21,16 @@ class Vec2(NamedTuple):
         """Add two Vec2s."""
         return Vec2(self.x + other.x,
                     self.y + other.y)
+
+    def __iadd__(self, other: 'Vec2') -> 'Vec2':
+        """In-place addition self+=other."""
+        self.x += other.x
+        self.y += other.y
+        return self
+
+    def __repr__(self) -> str:
+        """Return string representation of Vec2."""
+        return f"Vec2({self.x}, {self.y})"
 
 
 class Color(NamedTuple):
@@ -92,7 +103,7 @@ def get_random_color() -> Color:
     return Color(
         red=random.randint(0, 255),
         green=random.randint(0, 255),
-        blue=random.randing(0, 255)
+        blue=random.randint(0, 255)
     )
 
 
@@ -108,7 +119,7 @@ def get_random_velocity(
 
 
 def set_color(
-        renderer: sdl3.SDL_Renderer,
+        renderer: sdl3.SDL_POINTER,
         color: Color
 ) -> None:
     """Set Render Draw Color."""
@@ -181,15 +192,29 @@ def create_renderer(
     return renderer
 
 
+def close(renderer, window) -> None:
+    """Close contexts."""
+    sdl3.SDL_DestroyRenderer(renderer)
+    sdl3.SDL_DestroyWindow(window)
+    sdl3.SDL_Quit()
+
+
 @sdl3.SDL_main_func
 def main(
     argc: ctypes.c_int,
     argv: sdl3.LP_c_char_p
 ) -> ctypes.c_int:
     """Run the main part of the program."""
-    init()
-    window = create_window()
-    print(window)
-    renderer = create_renderer(window, try_vulkan=False)
-    print(renderer)
-    return 0
+    try:
+        init()
+        window = create_window()
+        print(window)
+        renderer = create_renderer(window, try_vulkan=False)
+        print(renderer)
+        background_color = Color()
+        set_color(renderer, background_color)
+        close(renderer, window)
+        return 0
+    except SDLException as se:
+        print(f"SDL error: {se}")
+        return 1
