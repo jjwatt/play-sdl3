@@ -98,7 +98,7 @@ def get_random_color() -> Color:
 
 def get_random_velocity(
     low: int = -20,
-    high: int = -20
+    high: int = 20
 ) -> Vec2:
     """Get a random velocity Vec2."""
     return Vec2(
@@ -195,7 +195,50 @@ def update_squares(
         screen_height: int
 ) -> None:
     """Update the squares positions."""
-    pass
+    for square in squares:
+        square.apply_gravity(world.gravity)
+        square.apply_air_resistance(world.air_resistance)
+        square.update_position()
+
+        is_on_right_wall = (
+            square.position.x >= screen_width - square.size.x
+        )
+        is_on_left_wall = (
+            square.position.x <= 0
+        )
+        is_on_wall = (is_on_right_wall or is_on_left_wall)
+        is_on_floor = (
+            square.position.y >= screen_height - square.size.y
+        )
+        is_on_ceiling = square.position.y <= 0
+
+        if is_on_wall:
+            # Reset x on boundries
+            if is_on_left_wall:
+                square.position.x = 0
+            if is_on_right_wall:
+                square.position.x = (
+                    screen_width - square.size.x
+                )
+            # Bounce off wall with some energy loss
+            square.damp_x(world.damping)
+            # Change to random color
+            square.color = get_random_color()
+        if is_on_floor:
+            square.position.y = (
+                screen_height - square.size.y
+            )
+            # Only bounce if moving fast enough.
+            if square.velocity.y > 0.5:
+                square.damp_y(world.damping)
+                square.color = get_random_color()
+            else:
+                square.velocity.x *= 0.95
+                square.velocity.y = 0
+        if is_on_ceiling:
+            square.position.y = 0
+            square.damp_y(world.damping)
+            square.color = get_random_color()
 
 
 def draw_squares(
@@ -204,7 +247,38 @@ def draw_squares(
         background_color: Color
 ) -> None:
     """Draw the squares."""
-    pass
+    set_color(renderer, background_color)
+    sdl3.SDL_RenderClear(renderer)
+    for square in squares:
+        set_color(renderer, square.color)
+        rect = sdl3.SDL_FRect(
+            int(square.position.x),
+            int(square.position.y),
+            int(square.size.x),
+            int(square.size.y)
+        )
+        sdl3.SDL_RenderFillRect(renderer, rect)
+
+    sdl3.SDL_RenderPresent(renderer)
+
+
+def init_squares(
+        num_squares,
+        screen_width,
+        screen_height
+) -> list[Square]:
+    """Initialize squares."""
+    squares = []
+    print(f"{num_squares=}")
+    for _ in range(num_squares):
+        square = Square(
+            Vec2(100.0, 100.0),
+            Vec2(screen_width / 2, screen_height / 2),
+        )
+        square.velocity = get_random_velocity()
+        square.color = get_random_color()
+        squares.append(square)
+    return squares
 
 
 @sdl3.SDL_main_func
@@ -226,20 +300,35 @@ def main(
         print(window)
         renderer = create_renderer(window, try_vulkan=False)
         print(renderer)
+
+        num_squares = 4
+        # Create squares.
+        squares = init_squares(
+            num_squares, screen_width, screen_height
+        )
+        # Create world.
+        world = World()
+
+        event = sdl3.SDL_Event()
+        running = True
+        while running:
+            while sdl3.SDL_PollEvent(ctypes.byref(event)):
+                match event.type:
+                    case sdl3.SDL_EVENT_QUIT:
+                        running = False
+                    case sdl3.SDL_EVENT_KEY_DOWN:
+                        if event.key.key in [sdl3.SDLK_ESCAPE]:
+                            running = False
+            set_color(renderer, background_color)
+            update_squares(
+                squares, world, screen_width, screen_height
+            )
+            draw_squares(squares, renderer, background_color)
+            sdl3.SDL_Delay(15)
+        return 0
     except SDLException as se:
         print(f"SDL error: {se}")
         return 1
-
-    set_color(renderer, background_color)
-    num_squares = 4
-    squares = []
-    for _ in range(num_squares):
-        square = Square(
-            Vec2(100.0, 100.0),
-            Vec2(screen_width / 2, screen_height / 2),
-            get_random_velocity()
-        )
-        square.color = get_random_color()
-        squares.append(square)
-    close(renderer, window)
-    return 0
+    finally:
+        if renderer and window:
+            close(renderer, window)
