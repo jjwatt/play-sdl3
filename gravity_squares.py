@@ -1,6 +1,6 @@
 """Gravity Squares."""
 import ctypes
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import random
 import sdl3
 from typing import NamedTuple
@@ -51,21 +51,10 @@ class Color(NamedTuple):
 class Square:
     """A colored square for moving around."""
 
-    size: Vec2 = None
-    position: Vec2 = None
-    velocity: Vec2 = None
-    color: Color = None
-
-    def __post_init__(self):
-        """Initialize default values if not provided."""
-        if self.size is None:
-            self.size = Vec2(10.0, 10.0)
-        if self.position is None:
-            self.position = Vec2(0.0, 0.0)
-        if self.velocity is None:
-            self.velocity = Vec2(0.0, 0.0)
-        if self.color is None:
-            self.color = Color()
+    size: Vec2 = field(default_factory=lambda: Vec2(10.0, 10.0))
+    position: Vec2 = field(default_factory=lambda: Vec2(0.0, 0.0))
+    velocity: Vec2 = field(default_factory=lambda: Vec2(0.0, 0.0))
+    color: Color = field(default_factory=Color)
 
     def apply_gravity(self, gravity: float):
         """Apply gravity to velocity."""
@@ -199,22 +188,58 @@ def close(renderer, window) -> None:
     sdl3.SDL_Quit()
 
 
+def update_squares(
+        squares: list[Square],
+        world: World,
+        screen_width: int,
+        screen_height: int
+) -> None:
+    """Update the squares positions."""
+    pass
+
+
+def draw_squares(
+        squares: list[Square],
+        renderer: sdl3.SDL_POINTER,
+        background_color: Color
+) -> None:
+    """Draw the squares."""
+    pass
+
+
 @sdl3.SDL_main_func
 def main(
     argc: ctypes.c_int,
     argv: sdl3.LP_c_char_p
 ) -> ctypes.c_int:
     """Run the main part of the program."""
+    screen_width = 800
+    screen_height = 600
+    background_color = Color()
+
     try:
         init()
-        window = create_window()
+        window = create_window(
+            width=screen_width,
+            height=screen_height
+        )
         print(window)
         renderer = create_renderer(window, try_vulkan=False)
         print(renderer)
-        background_color = Color()
-        set_color(renderer, background_color)
-        close(renderer, window)
-        return 0
     except SDLException as se:
         print(f"SDL error: {se}")
         return 1
+
+    set_color(renderer, background_color)
+    num_squares = 4
+    squares = []
+    for i in range(num_squares):
+        square = Square(
+            Vec2(100.0, 100.0),
+            Vec2(screen_width / 2, screen_height / 2),
+            get_random_velocity()
+        )
+        square.color = get_random_color()
+        squares.append(square)
+    close(renderer, window)
+    return 0
