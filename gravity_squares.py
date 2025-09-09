@@ -233,7 +233,7 @@ def main(
     set_color(renderer, background_color)
     num_squares = 4
     squares = []
-    for i in range(num_squares):
+    for _ in range(num_squares):
         square = Square(
             Vec2(100.0, 100.0),
             Vec2(screen_width / 2, screen_height / 2),
