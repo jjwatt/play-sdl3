@@ -2,8 +2,9 @@
 import ctypes
 from dataclasses import dataclass, field
 import random
-import sdl3
 from typing import NamedTuple
+
+import sdl3
 
 
 class SDLException(Exception):
@@ -301,7 +302,7 @@ def main(
         renderer = create_renderer(window, try_vulkan=False)
         print(renderer)
 
-        num_squares = 4
+        num_squares = 10
         # Create squares.
         squares = init_squares(
             num_squares, screen_width, screen_height

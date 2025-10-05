@@ -8,5 +8,6 @@ dependencies = [
     "hy>=1.1.0",
     "hyrule>=1.0.0",
     "mypy>=1.17.1",
+    "pylsp-mypy>=0.7.0",
     "pysdl3>=0.9.8b9",
 ]
